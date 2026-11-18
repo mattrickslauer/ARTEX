@@ -535,6 +535,30 @@ a trusted peer can claim any client address.
 
 ---
 
+## MCP server (drive ARTEX from Claude Code)
+
+`cmd/artex-mcp` is a stdio MCP server that wraps the REST API, so an MCP client such as
+Claude Code can create scoped engagements, launch tasks, read agent activity, decide approvals
+and pull findings/reports. It is a plain HTTP client of `/api` and grants nothing the API doesn't.
+
+```bash
+go install ./cmd/artex-mcp
+echo 'your-admin-password' > ~/.config/artex-mcp.pw && chmod 600 ~/.config/artex-mcp.pw
+claude mcp add artex -s user \
+  -e ARTEX_URL=http://127.0.0.1:8787 \
+  -e ARTEX_PASSWORD_FILE=$HOME/.config/artex-mcp.pw \
+  -- "$(go env GOPATH)/bin/artex-mcp"
+```
+
+Env: `ARTEX_URL` (default `http://127.0.0.1:8787`), one of `ARTEX_PASSWORD`,
+`ARTEX_PASSWORD_FILE` or `ARTEX_TOKEN`. It logs in as the admin user and re-logs in on 401.
+
+Tools: `artex_status`, `artex_list_companies`, `artex_create_company`, `artex_add_company_scope`,
+`artex_list_tasks`, `artex_get_task`, `artex_create_task` (launches immediately; pass `company_ids`),
+`artex_list_task_scope`, `artex_add_task_scope`, `artex_control_task`, `artex_chat`, `artex_activity`,
+`artex_pending_approvals`, `artex_decide_approval`, `artex_list_assets`, `artex_list_findings`,
+`artex_get_finding`, `artex_report`, and `artex_api` (any `/api/*` call).
+
 ## Operations
 
 ### Backups
