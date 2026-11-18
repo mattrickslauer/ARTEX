@@ -54,11 +54,13 @@ func newClient() *client {
 	}
 	pw := os.Getenv("ARTEX_PASSWORD")
 	if f := os.Getenv("ARTEX_PASSWORD_FILE"); pw == "" && f != "" {
-		b, err := os.ReadFile(f)
-		if err != nil {
-			log.Fatalf("ARTEX_PASSWORD_FILE: %v", err)
+		// Read lazily-tolerant: a missing file must not stop the server from
+		// starting, or the MCP client just sees "connection closed".
+		if b, err := os.ReadFile(f); err == nil {
+			pw = strings.TrimSpace(string(b))
+		} else {
+			log.Printf("artex-mcp: ARTEX_PASSWORD_FILE unreadable (%v); tools will report not authenticated", err)
 		}
-		pw = strings.TrimSpace(string(b))
 	}
 	return &client{
 		base:     base,
